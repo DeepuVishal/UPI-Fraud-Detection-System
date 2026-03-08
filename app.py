@@ -74,7 +74,7 @@ with nav_r:
 # --- 5. PAGE MODULES ---
 
 if st.session_state.page == 'Home':
-    set_bg_image(r"C:\Users\DEEPIKA\PycharmProjects\upi_fraud_detection\model\frontpage.jpg")
+    set_bg_image(r"frontpage.jpg")
     st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
     st.markdown("<h1 style='font-size: 6rem; font-weight: 900;'>UPI FRAUD DETECTION</h1>", unsafe_allow_html=True)
     st.markdown(
@@ -158,7 +158,7 @@ elif st.session_state.page == 'Analysis':
     if not st.session_state.logged_in:
         st.error("Login Required.")
     else:
-        set_bg_image(r"C:\Users\DEEPIKA\PycharmProjects\upi_fraud_detection\model\analayis.jpg")
+        set_bg_image(r"analayis.jpg")
         st.markdown("<h2 style='margin-top:80px;'>Forensic Intelligence Dashboard</h2>", unsafe_allow_html=True)
         df = pd.DataFrame(st.session_state.logs) if st.session_state.logs else pd.DataFrame(
             {'Verdict': ['SAFE', 'FRAUD'], 'Bank': ['SBI', 'HDFC'], 'Amount': [1000, 45000]})
@@ -173,4 +173,5 @@ elif st.session_state.page == 'Analysis':
             fig_bar = px.bar(df, x='Bank', y='Amount', color='Verdict', title="Institution Risk Exposure",
                              barmode='group', color_discrete_map={'SAFE': '#1E8E3E', 'FRAUD': '#D93025'})
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="white")
+
             st.plotly_chart(fig_bar, use_container_width=True)
