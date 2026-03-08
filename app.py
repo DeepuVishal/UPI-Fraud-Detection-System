@@ -30,12 +30,11 @@ def set_bg_color(color):
     st.markdown(f"""<style>.stApp {{ background: {color}; background-image: none; }}</style>""", unsafe_allow_html=True)
 
 
-# --- 2. GO-LIVE CORPORATE UI STYLING ---
+# --- 2. CORPORATE UI STYLING ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
     .stApp { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #FFFFFF; }
-
     header, footer { visibility: hidden; }
     div.stButton > button {
         background-color: transparent !important;
@@ -46,7 +45,6 @@ st.markdown("""
         text-transform: uppercase;
     }
     div.stButton > button:hover { color: #1A73E8 !important; text-decoration: underline !important; }
-
     .login-section { text-align: center; margin-top: 120px; }
     .field-label { color: #FFFFFF; font-size: 14px; font-weight: 600; display: block; margin-top: 15px; margin-bottom: 5px; }
     .status-alert { padding: 25px; border-radius: 10px; text-align: center; font-weight: 800; font-size: 26px; margin-top: 20px; }
@@ -112,12 +110,18 @@ elif st.session_state.page == 'Scanner':
             u_app = st.selectbox("", ["GPay", "PhonePe", "Paytm", "BHIM", "Amazon Pay", "PayZapp", "WhatsApp Pay"],
                                  label_visibility="collapsed")
             st.markdown("<span class='field-label'>Financial Institution</span>", unsafe_allow_html=True)
-            # KOTAK ADDED TO LIST
             u_bank = st.selectbox("", ["SBI", "HDFC", "ICICI", "Axis", "Kotak", "BOB", "PNB", "Canara", "Union Bank",
                                        "IndusInd"], label_visibility="collapsed")
+
         with c2:
+            st.markdown("<span class='field-label'>Agent Type (Behavior Pattern)</span>", unsafe_allow_html=True)
+            # MERGED: AGENT TYPE DROPDOWN ADDED HERE
+            agent_type = st.selectbox("", ["Normal", "Dormant", "Fraud", "Bot", "Impatient"],
+                                      label_visibility="collapsed")
+
             st.markdown("<span class='field-label'>Payment Mode</span>", unsafe_allow_html=True)
             u_meth = st.selectbox("", ["upi", "qr_code", "collect"], label_visibility="collapsed")
+
             st.markdown("<span class='field-label'>Transaction Velocity (Attempts)</span>", unsafe_allow_html=True)
             u_att = st.number_input("", min_value=1, label_visibility="collapsed")
 
@@ -125,24 +129,28 @@ elif st.session_state.page == 'Scanner':
             with st.spinner("Analyzing Behavior Patterns..."):
                 time.sleep(1)
 
-                # --- SYNCED MULTI-PATTERN LOGIC ---
+                # --- UPDATED MULTI-PATTERN LOGIC ---
                 is_fraud = False
 
-                # 1. BOT & IMPATIENT PATTERN (Extreme Velocity)
-                if u_att >= 11:
+                # 1. NEW RULE: HIGH RISK AGENT TYPES
+                if agent_type in ["Fraud", "Bot", "Impatient"]:
                     is_fraud = True
 
-                # 2. MICRO-FRAUD PATTERN (Row 1324 logic: Small amount + Moderate attempts)
+                # 2. BOT & IMPATIENT PATTERN (Extreme Velocity)
+                elif u_att >= 11:
+                    is_fraud = True
+
+                # 3. MICRO-FRAUD PATTERN (Small amount + Moderate attempts)
                 elif amt < 150 and u_att >= 6:
                     is_fraud = True
 
-                # 3. HIGH VALUE OUTLIER
+                # 4. HIGH VALUE OUTLIER
                 elif amt > 50000:
                     is_fraud = True
 
             if is_fraud:
                 st.markdown(
-                    "<div class='status-alert' style='background:#D93025;'>🚨 FRAUDULENT PATTERN IDENTIFIED</div>",
+                    f"<div class='status-alert' style='background:#D93025;'>🚨 FRAUDULENT PATTERN IDENTIFIED ({agent_type})</div>",
                     unsafe_allow_html=True)
                 st.image("https://cdn-icons-png.flaticon.com/512/5974/5974771.png", width=250)
             else:
@@ -163,6 +171,7 @@ elif st.session_state.page == 'Analysis':
         df = pd.DataFrame(st.session_state.logs) if st.session_state.logs else pd.DataFrame(
             {'Verdict': ['SAFE', 'FRAUD'], 'Bank': ['SBI', 'HDFC'], 'Amount': [1000, 45000]})
         st.dataframe(df, use_container_width=True)
+
         col1, col2 = st.columns(2)
         with col1:
             fig_pie = px.pie(df, names='Verdict', title="Risk Distribution", hole=0.5, color='Verdict',
@@ -173,5 +182,4 @@ elif st.session_state.page == 'Analysis':
             fig_bar = px.bar(df, x='Bank', y='Amount', color='Verdict', title="Institution Risk Exposure",
                              barmode='group', color_discrete_map={'SAFE': '#1E8E3E', 'FRAUD': '#D93025'})
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="white")
-
             st.plotly_chart(fig_bar, use_container_width=True)
