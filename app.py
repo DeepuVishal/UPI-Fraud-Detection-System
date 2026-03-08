@@ -57,9 +57,9 @@ if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'logs' not in st.session_state: st.session_state.logs = []
 
 # --- 4. TOP RIGHT NAVIGATION ---
-_, nav_r = st.columns([1.5, 1])
+_, nav_r = st.columns([1, 1]) # Adjusted for 5 buttons
 with nav_r:
-    n1, n2, n3, n4 = st.columns(4)
+    n1, n2, n3, n4, n5 = st.columns(5)
     with n1:
         if st.button("HOME"): st.session_state.page = 'Home'
     with n2:
@@ -68,11 +68,17 @@ with nav_r:
         if st.button("SCANNER"): st.session_state.page = 'Scanner'
     with n4:
         if st.button("ANALYSIS"): st.session_state.page = 'Analysis'
+    with n5:
+        # THE MISSING LOGOUT BUTTON
+        if st.button("LOGOUT"):
+            st.session_state.logged_in = False
+            st.session_state.page = 'Home'
+            st.rerun()
 
 # --- 5. PAGE MODULES ---
 
 if st.session_state.page == 'Home':
-    set_bg_image(r"frontpage.jpg")
+    set_bg_image(r"C:\Users\DEEPIKA\PycharmProjects\upi_fraud_detection\model\frontpage.jpg")
     st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
     st.markdown("<h1 style='font-size: 6rem; font-weight: 900;'>UPI FRAUD DETECTION</h1>", unsafe_allow_html=True)
     st.markdown(
@@ -166,7 +172,7 @@ elif st.session_state.page == 'Analysis':
     if not st.session_state.logged_in:
         st.error("Login Required.")
     else:
-        set_bg_image(r"analayis.jpg")
+        set_bg_image(r"C:\Users\DEEPIKA\PycharmProjects\upi_fraud_detection\model\analayis.jpg")
         st.markdown("<h2 style='margin-top:80px;'>Forensic Intelligence Dashboard</h2>", unsafe_allow_html=True)
         df = pd.DataFrame(st.session_state.logs) if st.session_state.logs else pd.DataFrame(
             {'Verdict': ['SAFE', 'FRAUD'], 'Bank': ['SBI', 'HDFC'], 'Amount': [1000, 45000]})
