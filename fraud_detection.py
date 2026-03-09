@@ -1,29 +1,26 @@
+import joblib
 import pandas as pd
-import pickle
+
+# Load trained model
+model = joblib.load("fraud_model.pkl")
 
 
-def detect_fraud(input_data):
-    """
-    Takes a dictionary of input and returns the fraud probability.
-    """
-    with open('fraud_model.pkl', 'rb') as f:
-        assets = pickle.load(f)
+def predict_fraud(amount, hour_of_day, attempt_count, fraud_score,
+                  is_night_transaction, is_weekend):
+    # Create dataframe for prediction
+    data = pd.DataFrame({
+        "amount": [amount],
+        "hour_of_day": [hour_of_day],
+        "attempt_count": [attempt_count],
+        "fraud_score": [fraud_score],
+        "is_night_transaction": [is_night_transaction],
+        "is_weekend": [is_weekend]
+    })
 
-    # Prepare the dataframe for prediction
-    df_input = pd.DataFrame([input_data])
+    # Predict
+    prediction = model.predict(data)
 
-    # Encode categorical values using the saved encoders
-    for col in assets['encoders']:
-        if col in df_input.columns:
-            le = assets['encoders'][col]
-            # Handle unseen categories gracefully
-            df_input[col] = df_input[col].apply(lambda x: le.transform([str(x)])[0] if str(x) in le.classes_ else -1)
-
-    # Reorder columns to match the training features
-    X_input = df_input[assets['features']]
-
-    # Get probability of fraud (class 1)
-    prob = assets['model'].predict_proba(X_input)[0][1]
-    prediction = assets['model'].predict(X_input)[0]
-
-    return prediction, prob
+    if prediction[0] == 1:
+        return "🚨 Fraudulent Transaction Detected"
+    else:
+        return "✅ Legitimate Transaction"
